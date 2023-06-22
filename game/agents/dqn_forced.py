@@ -96,7 +96,7 @@ class DQNAgentForced(DQNAgent):
                 # Train the neural network
                 self.counter = 0
 
-            if action == 3 and (actionMove == teacherActionMove):
+            if action == 3 and (actionMove.position == teacherActionMove[0].position):
                 alpha = 1 - (1 - self._alpha) * self._beta
 
             if self._reward:
