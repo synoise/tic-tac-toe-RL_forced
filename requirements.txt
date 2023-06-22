@@ -1,3 +1,6 @@
-tensorflow == 2.3.1
-numpy == 1.18.5
+tensorflow~=2.11.0
+numpy~=1.24.2
 7.19.0 == 7.19.0
+matplotlib~=3.6.3
+cycler~=0.11.0
+ipython~=8.9.0
