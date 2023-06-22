@@ -41,16 +41,16 @@ class DQNAgentForcedTEST(DQNAgent):
         if game.is_game_over():
             winners = game.get_winners()
             if len(winners) > 1:
-                return self.reward_draw
+                return self.reward_draw  # nagrodą za remis  +3
             elif winners[0] == self.i_agent:
-                return self.reward_win
+                return self.reward_win  # nagrodą za wygrana    +10
             else:
-                return self.reward_loss
+                return self.reward_loss  # nagrodą za przegrana - kara   -10
         else:
-            return 0
+            return 0       # nagroda cząstkowa   0
 
-    def evirometFunction(self, act, game):
-        # if act == 2:
+    def evirometFunction(self, game):   # wynik z sieci
+
         game_state = self.get_model_inputs(game)
         # Predict action based on current game state.
         q_values = self.model.predict(np.array([game_state]))[0]
@@ -63,21 +63,21 @@ class DQNAgentForcedTEST(DQNAgent):
     def next(self, game: TicTacToeGame) -> bool:
         self._reward = self.commit_log(game, False)
 
-        if self.is_learning and (
+        if self.is_learning and (   #  epsilon jest zmniejszane by zmniejszyć szanse wykonywania przypadkowej akcji. użyto funkcji lerp() - interpolacji liniowej
                 self.num_games < self.pre_training_games or
                 random.uniform(0, 1) < lerp([self.epsilon, self.epsilon_end], max(0, self.num_games - self.pre_training_games) * self.epsilon_decay_linear)
         ):
-            actionMove = random.choice(game.get_legal_actions(self.i_agent))
+            actionMove = random.choice(game.get_legal_actions(self.i_agent))  # ruch losowy.
 
         elif random.uniform(0, 1) < self._alpha:
-            actionMove = self.evirometFunction(self, game)
+            actionMove = self.evirometFunction(game)   # Agent wykonuje akcje w oparciu o wyjście sieci neuronowej
 
         else:
-            actionMove = self.evirometFunction(self, game)
-            teacherActionMove = self._minMaxAgent.get_max_action(game, self._id)
+            actionMove = self.evirometFunction(game)   # Agent wykonuje akcje w oparciu o wyjście sieci neuronowej
+            teacherActionMove = self._minMaxAgent.get_max_action(game, self._id)   # sugerowany ruch nauczyciela MinMax
 
-            if actionMove.position == teacherActionMove[0].position:
-                self._alpha = 1 - (1 - self._alpha) * self._beta
+            if actionMove.position == teacherActionMove[0].position:  # warunek ( porównanie ruchu nauczyciela MinMax i akcji NN.
+                self._alpha = 1 - (1 - self._alpha) * self._beta     # alpha jest zwiększane szanse by zwiększyć szanse wykonywania wyuczonej przez siec neuronowa akcji
 
         self.prepare_log(game, actionMove)
         return game.next(actionMove)
